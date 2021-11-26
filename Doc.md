@@ -14,3 +14,9 @@
 
 # passo a passo
 
+# fontes 
+    <!--
+font-family: 'Montserrat', sans-serif;
+font-family: 'Raleway', sans-serif;
+-->
+

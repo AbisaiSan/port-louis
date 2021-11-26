@@ -9,8 +9,11 @@
     <!--Vuex-->
     <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.js"></script>
     <!--V-mask -->
-    <script src="https://unpkg.com/vuelidate@0.7.6/dist/vuelidate.min.js"></script>
-    <script src="https://unpkg.com/vuelidate@0.7.6/dist/validators.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuelidate@0.7.4/dist/vuelidate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuelidate@0.7.4/dist/validators.min.js"></script>
+    <!--Vee-validate-->
+    <!-- jsdelivr cdn -->
+    <script src="https://cdn.jsdelivr.net/npm/vee-validate@latest/dist/vee-validate.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/v-mask/dist/v-mask.min.js"></script>
     <!--TailwindCss-->
     <link
@@ -92,7 +95,7 @@
                         </button>
                       </div>
                       <div class="mt-4">
-                        <form action="">
+                        <form @submit.prevent="getValidation">
                           <div class="mb-5">
                             <label
                               for="name"
@@ -101,8 +104,8 @@
                             >
                             <input
                               type="text"
-                              v-model.trim="contact.name"
-                              @input="setName($event.target.value)"
+                              v-model="contact.name"
+                              :class="{ 'is-invalid': submitted && $v.personContact.name.$error }"
                               class="
                                 w-full
                                 p-2
@@ -113,6 +116,13 @@
                                 focus:ring-blue-200
                               "
                             />
+                            <div
+                              v-if="submitted && !$v.personContact.name.required"
+                            >
+                              <span class="text-red-700"
+                                >Nome é obrigatorio.</span
+                              >
+                            </div>
                           </div>
                           <div class="mb-5">
                             <label
@@ -121,17 +131,26 @@
                               >Telefone</label
                             >
                             <input
-                              type="number"
+                              type="text"
                               v-model="contact.telephone"
+                              :class="{ 'is-invalid': submitted && $v.personContact.telephone.$error }"
                               class="
                                 w-full
                                 p-2
                                 border border-gray-300
                                 rounded-l
                               "
-                              v-mask="'+55 (##) #####-####'"
+                              v-mask="'(##) #####-####'"
                             />
-                            <p class="mt-1 text-sm text-red-400">Telefone</p>
+                            <div
+                              v-if="submitted && !$v.personContact.telephone.required"
+                            >
+                              <span
+                                class="text-red-700"
+                              >
+                                Obrigatorio
+                              </span>
+                            </div>
                           </div>
                           <button
                             type="submit"
@@ -144,7 +163,7 @@
                               bg-blue-500
                               rounded-l
                             "
-                            @click="add()"
+                            @click="add"
                           >
                             Adicionar
                           </button>
@@ -286,14 +305,13 @@
         </div>
       </div>
     </main>
-    <!--
-font-family: 'Montserrat', sans-serif;
-font-family: 'Raleway', sans-serif;
--->
+
 
     <script type="text/javascript">
-      Vue.use(window.vuelidate.default);
-      const { required, minLength, numeric } = window.validators;
+      Vue.use(VueMask.VueMaskPlugin);
+      Vue.directive("mask", VueMask.VueMaskDirective);
+      Vue.use(vuelidate.default);
+      const { required, minLength} = window.validators;
 
       new Vue({
         el: "#app",
@@ -307,41 +325,29 @@ font-family: 'Raleway', sans-serif;
           index: null,
           list: [],
           showModal: false,
+          submitted: false,
         },
         validations: {
-         
+          personContact: {
             name: {
-              required,
+              required: required,
               minLength: minLength(4),
             },
             telephone: {
-              required,
-              numeric,
+              required: required,
             },
-       
+          },
         },
         mounted() {
           const contacts = JSON.parse(localStorage.getItem("contacts"));
           this.list = contacts ? contacts : [];
         },
         methods: {
-          submit() {
-            console.log("submit!");
-            this.$v.$touch();
-            if (this.$v.$invalid) {
-              this.submitStatus = "ERROR";
-            } else {
-              // do your submit logic here
-              this.submitStatus = "PENDING";
-              setTimeout(() => {
-                this.submitStatus = "OK";
-              }, 500);
-            }
-          },
           toggleModal: function () {
             this.showModal = !this.showModal;
           },
           add() {
+           
             if (this.contact.id === 0) {
               this.contact.id = this.list.length + 1;
               this.list.push(this.contact);
@@ -366,6 +372,15 @@ font-family: 'Raleway', sans-serif;
             this.index = this.list.indexOf(item);
             this.contact = Object.assign({}, item);
             localStorage.setItem("contacts", JSON.stringify(this.list));
+          },
+        },
+        computed: {
+          getValidation(e) {
+             this.submitted = true;
+            this.$v.$touch();
+            if (this.$v.$invalid) {
+              return;
+            }
           },
         },
       });
