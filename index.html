@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--Vue-->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <!--Vuex-->
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.js"></script>
+    <!--V-mask -->
+    <script src="https://cdn.jsdelivr.net/npm/vuelidate@0.7.4/dist/vuelidate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuelidate@0.7.4/dist/validators.min.js"></script>
+    <!--Vee-validate-->
+    <!-- jsdelivr cdn -->
+    <script src="https://cdn.jsdelivr.net/npm/vee-validate@latest/dist/vee-validate.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/v-mask/dist/v-mask.min.js"></script>
+    <!--TailwindCss-->
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <!--Fontes-->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,500;0,700;1,600&family=Raleway:wght@100;300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <title>Contatos - Port Louis</title>
+  </head>
+
+  <body>
+    <main>
+      <div id="app">
+        <div class="container mx-auto px-4 sm:px-8 max-w-3xl">
+          <div class="py-8">
+            <div class="flex flex-row mb-1 sm:mb-0 justify-between w-full">
+              <h2 class="text-2xl leading-tight">{{message}}</h2>
+              <div class="text-end">
+                <button
+                  class="
+                    flex-shrink-0
+                    px-4
+                    py-2
+                    text-base
+                    font-semibold
+                    text-white
+                    bg-red-700
+                    rounded-lg
+                    shadow-md
+                    hover:bg-red-600
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-purple-500
+                    focus:ring-offset-2
+                    focus:ring-offset-purple-200
+                  "
+                  type="button"
+                  v-on:click="toggleModal()"
+                >
+                  Adicionar
+                </button>
+
+                <div
+                  v-if="showModal"
+                  class="container flex justify-center mx-auto"
+                >
+                  <div
+                    class="
+                      absolute
+                      inset-0
+                      flex
+                      items-center
+                      justify-center
+                      bg-opacity-50
+                    "
+                  >
+                    <div class="w-96 rounded border-2 shadow-md p-6 bg-white">
+                      <div class="flex items-center justify-between">
+                        <h3 class="text-2xl">Novo Contato</h3>
+                        <button v-on:click="toggleModal()">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-6 w-6"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                      <div class="mt-4">
+                        <form @submit.prevent="getValidation">
+                          <div class="mb-5">
+                            <label
+                              for="name"
+                              class="block font-bold text-gray-600"
+                              >Nome</label
+                            >
+                            <input
+                              type="text"
+                              v-model="contact.name"
+                              :class="{ 'is-invalid': submitted && $v.personContact.name.$error }"
+                              class="
+                                w-full
+                                p-2
+                                border border-gray-300
+                                rounded-l
+                                focus:outline-none
+                                focus:ring-2
+                                focus:ring-blue-200
+                              "
+                            />
+                            <div
+                              v-if="submitted && !$v.personContact.name.required"
+                            >
+                              <span class="text-red-700"
+                                >Nome é obrigatorio.</span
+                              >
+                            </div>
+                          </div>
+                          <div class="mb-5">
+                            <label
+                              for="text"
+                              class="block font-bold text-gray-600"
+                              >Telefone</label
+                            >
+                            <input
+                              type="text"
+                              v-model="contact.telephone"
+                              :class="{ 'is-invalid': submitted && $v.personContact.telephone.$error }"
+                              class="
+                                w-full
+                                p-2
+                                border border-gray-300
+                                rounded-l
+                              "
+                              v-mask="'(##) #####-####'"
+                            />
+                            <div
+                              v-if="submitted && !$v.personContact.telephone.required"
+                            >
+                              <span
+                                class="text-red-700"
+                              >
+                                Obrigatorio
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            type="submit"
+                            class="
+                              block
+                              w-full
+                              p-3
+                              font-bold
+                              text-white
+                              bg-blue-500
+                              rounded-l
+                            "
+                            @click="add"
+                          >
+                            Adicionar
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
+              <div
+                class="
+                  inline-block
+                  min-w-full
+                  shadow
+                  rounded-lg
+                  overflow-hidden
+                "
+              >
+                <table class="min-w-full leading-normal">
+                  <thead class="py-5">
+                    <tr>
+                      <th
+                        scope="col"
+                        class="
+                          px-5
+                          py-3
+                          bg-white
+                          border-b border-gray-200
+                          text-gray-800 text-left text-sm
+                          uppercase
+                          font-normal
+                        "
+                      >
+                        Nome
+                      </th>
+                      <th
+                        scope="col"
+                        class="
+                          px-5
+                          py-3
+                          bg-white
+                          border-b border-gray-200
+                          text-gray-800 text-left text-sm
+                          uppercase
+                          font-normal
+                        "
+                      >
+                        Telefone
+                      </th>
+                      <th
+                        scope="col"
+                        class="
+                          px-5
+                          py-3
+                          bg-white
+                          border-b border-gray-200
+                          text-gray-800 text-left text-sm
+                          uppercase
+                          font-normal
+                        "
+                      >
+                        Ações
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="item in list">
+                      <td
+                        class="
+                          px-5
+                          py-5
+                          border-b border-gray-200
+                          bg-white
+                          text-sm
+                        "
+                      >
+                        <div class="flex items-center">
+                          <div class="ml-3">
+                            <p class="text-gray-900 whitespace-no-wrap">
+                              {{ item.name }}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="
+                          px-5
+                          py-5
+                          border-b border-gray-200
+                          bg-white
+                          text-sm
+                        "
+                      >
+                        <p class="text-gray-900 whitespace-no-wrap">
+                          {{ item.telephone }}
+                        </p>
+                      </td>
+                      <td class="px-5 py-5 bg-white text-sm flex">
+                        <button
+                          v-on:click="toggleModal()"
+                          @click="edit(item)"
+                          class="btn btn-info"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"
+                            />
+                          </svg>
+                        </button>
+
+                        <button @click="remove(item)" class="btn btn-danger">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fill-rule="evenodd"
+                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+
+    <script type="text/javascript">
+      Vue.use(VueMask.VueMaskPlugin);
+      Vue.directive("mask", VueMask.VueMaskDirective);
+      Vue.use(vuelidate.default);
+      const { required, minLength} = window.validators;
+
+      new Vue({
+        el: "#app",
+        data: {
+          message: "Lista de Contatos",
+          contact: {
+            id: 0,
+            name: null,
+            telephone: null,
+          },
+          index: null,
+          list: [],
+          showModal: false,
+          submitted: false,
+        },
+        validations: {
+          personContact: {
+            name: {
+              required: required,
+              minLength: minLength(4),
+            },
+            telephone: {
+              required: required,
+            },
+          },
+        },
+        mounted() {
+          const contacts = JSON.parse(localStorage.getItem("contacts"));
+          this.list = contacts ? contacts : [];
+        },
+        methods: {
+          toggleModal: function () {
+            this.showModal = !this.showModal;
+          },
+          add() {
+           
+            if (this.contact.id === 0) {
+              this.contact.id = this.list.length + 1;
+              this.list.push(this.contact);
+            } else {
+              this.list[this.index] = this.contact;
+            }
+            localStorage.setItem("contacts", JSON.stringify(this.list));
+            this.contact = {
+              id: 0,
+              name: null,
+              telephone: null,
+            };
+          },
+
+          remove(item) {
+            const idx = this.list.indexOf(item);
+            this.list.splice(idx, 1);
+            localStorage.setItem("contacts", JSON.stringify(this.list));
+          },
+
+          edit(item) {
+            this.index = this.list.indexOf(item);
+            this.contact = Object.assign({}, item);
+            localStorage.setItem("contacts", JSON.stringify(this.list));
+          },
+        },
+        computed: {
+          getValidation(e) {
+             this.submitted = true;
+            this.$v.$touch();
+            if (this.$v.$invalid) {
+              return;
+            }
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
