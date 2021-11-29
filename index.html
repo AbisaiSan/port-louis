@@ -9,12 +9,10 @@
     <!--Vuex-->
     <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.js"></script>
     <!--V-mask -->
+     <script src="https://cdn.jsdelivr.net/npm/v-mask/dist/v-mask.min.js"></script>
+      <!--Vuelidate-->
     <script src="https://cdn.jsdelivr.net/npm/vuelidate@0.7.4/dist/vuelidate.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vuelidate@0.7.4/dist/validators.min.js"></script>
-    <!--Vee-validate-->
-    <!-- jsdelivr cdn -->
-    <script src="https://cdn.jsdelivr.net/npm/vee-validate@latest/dist/vee-validate.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/v-mask/dist/v-mask.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuelidate@0.7.4/dist/validators.min.js"></script>   
     <!--TailwindCss-->
     <link
       href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
@@ -95,6 +93,7 @@
                         </button>
                       </div>
                       <div class="mt-4">
+                        <!--Form-->
                         <form @submit.prevent="getValidation">
                           <div class="mb-5">
                             <label
@@ -105,7 +104,7 @@
                             <input
                               type="text"
                               v-model="contact.name"
-                              :class="{ 'is-invalid': submitted && $v.personContact.name.$error }"
+                              :class="{ 'is-invalid': submitted && $v.contact.name.$error }"
                               class="
                                 w-full
                                 p-2
@@ -117,7 +116,7 @@
                               "
                             />
                             <div
-                              v-if="submitted && !$v.personContact.name.required"
+                              v-if="submitted && !$v.contact.name.required"
                             >
                               <span class="text-red-700"
                                 >Nome é obrigatorio.</span
@@ -133,7 +132,7 @@
                             <input
                               type="text"
                               v-model="contact.telephone"
-                              :class="{ 'is-invalid': submitted && $v.personContact.telephone.$error }"
+                              :class="{ 'is-invalid': submitted && $v.contact.telephone.$error }"
                               class="
                                 w-full
                                 p-2
@@ -143,7 +142,7 @@
                               v-mask="'(##) #####-####'"
                             />
                             <div
-                              v-if="submitted && !$v.personContact.telephone.required"
+                              v-if="submitted && !$v.contact.telephone.required"
                             >
                               <span
                                 class="text-red-700"
@@ -174,6 +173,7 @@
                 </div>
               </div>
             </div>
+            <!--Tab list-->
             <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
               <div
                 class="
@@ -328,7 +328,7 @@
           submitted: false,
         },
         validations: {
-          personContact: {
+          contact: {
             name: {
               required: required,
               minLength: minLength(4),
@@ -345,6 +345,14 @@
         methods: {
           toggleModal: function () {
             this.showModal = !this.showModal;
+          },
+          getValidation(e) {
+             this.submitted = true;
+            this.$v.$touch();
+            if (this.$v.$invalid) {
+              return;
+            }
+              console.log(JSON.stringify(this.contact))
           },
           add() {
            
@@ -373,16 +381,7 @@
             this.contact = Object.assign({}, item);
             localStorage.setItem("contacts", JSON.stringify(this.list));
           },
-        },
-        computed: {
-          getValidation(e) {
-             this.submitted = true;
-            this.$v.$touch();
-            if (this.$v.$invalid) {
-              return;
-            }
-          },
-        },
+        }
       });
     </script>
   </body>
