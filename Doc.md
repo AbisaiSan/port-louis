@@ -20,3 +20,6 @@ font-family: 'Montserrat', sans-serif;
 font-family: 'Raleway', sans-serif;
 -->
 
+:class="[{ border-b border-gray-200 : item.ddd === 11 }, errorClass]"
+:class="{'hidden' : item.ddd === 11 , 'border-b border-blue-400': item.ddd != 11}"
+
