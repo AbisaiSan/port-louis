@@ -9,12 +9,10 @@
     <!--Vuex-->
     <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.js"></script>
     <!--V-mask -->
+    <script src="https://cdn.jsdelivr.net/npm/v-mask/dist/v-mask.min.js"></script>
+    <!--Vuelidate-->
     <script src="https://cdn.jsdelivr.net/npm/vuelidate@0.7.4/dist/vuelidate.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuelidate@0.7.4/dist/validators.min.js"></script>
-    <!--Vee-validate-->
-    <!-- jsdelivr cdn -->
-    <script src="https://cdn.jsdelivr.net/npm/vee-validate@latest/dist/vee-validate.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/v-mask/dist/v-mask.min.js"></script>
     <!--TailwindCss-->
     <link
       href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
@@ -56,7 +54,7 @@
                     focus:ring-offset-2
                     focus:ring-offset-purple-200
                   "
-                  type="button"
+                  type="reset"
                   v-on:click="toggleModal()"
                 >
                   Adicionar
@@ -78,7 +76,7 @@
                   >
                     <div class="w-96 rounded border-2 shadow-md p-6 bg-white">
                       <div class="flex items-center justify-between">
-                        <h3 class="text-2xl">Novo Contato</h3>
+                        <h3 class="text-2xl">Contato</h3>
                         <button v-on:click="toggleModal()">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -95,7 +93,8 @@
                         </button>
                       </div>
                       <div class="mt-4">
-                        <form @submit.prevent="getValidation">
+                        <!--Form-->
+                        <form @submit.prevent="validationContact">
                           <div class="mb-5">
                             <label
                               for="name"
@@ -105,7 +104,7 @@
                             <input
                               type="text"
                               v-model="contact.name"
-                              :class="{ 'is-invalid': submitted && $v.personContact.name.$error }"
+                              :class="{ 'is-invalid': submitted && $v.contact.name.$error }"
                               class="
                                 w-full
                                 p-2
@@ -116,11 +115,16 @@
                                 focus:ring-blue-200
                               "
                             />
-                            <div
-                              v-if="submitted && !$v.personContact.name.required"
-                            >
-                              <span class="text-red-700"
-                                >Nome é obrigatorio.</span
+                            <div>
+                              <span
+                                class="text-red-700"
+                                v-if="!$v.contact.name.required"
+                                >O preenchimento do nome é obrigatorio.</span
+                              >
+                              <span
+                                class="text-red-700"
+                                v-if="!$v.contact.name.minLength"
+                                >Seu nome precisar ter mais de 6 letras.</span
                               >
                             </div>
                           </div>
@@ -133,7 +137,7 @@
                             <input
                               type="text"
                               v-model="contact.telephone"
-                              :class="{ 'is-invalid': submitted && $v.personContact.telephone.$error }"
+                              :class="{ 'is-invalid': submitted && $v.contact.telephone.$error }"
                               class="
                                 w-full
                                 p-2
@@ -143,30 +147,52 @@
                               v-mask="'(##) #####-####'"
                             />
                             <div
-                              v-if="submitted && !$v.personContact.telephone.required"
+                              v-if="submitted && !$v.contact.telephone.required"
                             >
+                              <span class="text-red-700"
+                                >O preenchimento do número é obrigatorio
+                              </span>
                               <span
                                 class="text-red-700"
+                                v-if="!$v.contact.telephone.minLength"
+                                >Preencha o contato corretamente.</span
                               >
-                                Obrigatorio
-                              </span>
                             </div>
                           </div>
-                          <button
-                            type="submit"
-                            class="
-                              block
-                              w-full
-                              p-3
-                              font-bold
-                              text-white
-                              bg-blue-500
-                              rounded-l
-                            "
-                            @click="add"
-                          >
-                            Adicionar
-                          </button>
+                          <template>
+                            <button
+                              type="submit"
+                              class="
+                                block
+                                w-full
+                                p-3
+                                font-bold
+                                text-white
+                                bg-blue-500
+                                rounded-l
+                              "
+                              @click="createContact"
+                            >
+                              Adicionar
+                            </button>
+                          </template>
+                          <template>
+                            <button
+                              type="submit"
+                              class="
+                                block
+                                w-full
+                                p-3
+                                font-bold
+                                text-white
+                                bg-blue-500
+                                rounded-l
+                              "
+                              @click="edit(item)"
+                            >
+                              Atualizar
+                            </button>
+                          </template>
                         </form>
                       </div>
                     </div>
@@ -174,6 +200,7 @@
                 </div>
               </div>
             </div>
+            <!--Tab list-->
             <div class="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
               <div
                 class="
@@ -232,7 +259,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="item in list">
+                    <tr v-for="item in list" :key="item.id">
                       <td
                         class="
                           px-5
@@ -260,7 +287,7 @@
                         "
                       >
                         <p class="text-gray-900 whitespace-no-wrap">
-                          {{ item.telephone }}
+                          {{ item.telephone }} {{ item.ddd }}
                         </p>
                       </td>
                       <td class="px-5 py-5 bg-white text-sm flex">
@@ -280,7 +307,7 @@
                             />
                           </svg>
                         </button>
-
+                        <button @click="blueDDD(item)">DDD</button>
                         <button @click="remove(item)" class="btn btn-danger">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -306,12 +333,11 @@
       </div>
     </main>
 
-
     <script type="text/javascript">
       Vue.use(VueMask.VueMaskPlugin);
       Vue.directive("mask", VueMask.VueMaskDirective);
       Vue.use(vuelidate.default);
-      const { required, minLength} = window.validators;
+      const { required, minLength } = window.validators;
 
       new Vue({
         el: "#app",
@@ -319,22 +345,26 @@
           message: "Lista de Contatos",
           contact: {
             id: 0,
-            name: null,
-            telephone: null,
+            name: "",
+            telephone: "",
+            ddd: "",
           },
-          index: null,
+          index: "",
           list: [],
           showModal: false,
           submitted: false,
+          createContactModal: true,
+          editContactModal: true,
         },
         validations: {
-          personContact: {
+          contact: {
             name: {
-              required: required,
-              minLength: minLength(4),
+              required,
+              minLength: minLength(6),
             },
             telephone: {
-              required: required,
+              required,
+              minLength: minLength(11),
             },
           },
         },
@@ -346,8 +376,18 @@
           toggleModal: function () {
             this.showModal = !this.showModal;
           },
-          add() {
-           
+          validationContact() {
+            this.submitted = true;
+            this.$v.$touch();
+            if (this.$v.$invalid) {
+              return;
+            }
+          },
+          createContact() {
+            this.$v.$touch();
+            if (this.$v.$error) {
+              return;
+            }
             if (this.contact.id === 0) {
               this.contact.id = this.list.length + 1;
               this.list.push(this.contact);
@@ -359,9 +399,9 @@
               id: 0,
               name: null,
               telephone: null,
+              ddd: null,
             };
           },
-
           remove(item) {
             const idx = this.list.indexOf(item);
             this.list.splice(idx, 1);
@@ -373,14 +413,12 @@
             this.contact = Object.assign({}, item);
             localStorage.setItem("contacts", JSON.stringify(this.list));
           },
-        },
-        computed: {
-          getValidation(e) {
-             this.submitted = true;
-            this.$v.$touch();
-            if (this.$v.$invalid) {
-              return;
-            }
+          blueDDD(item) {
+            this.contact = Object.assign({}, item);
+            const filterDDD = this.contact.telephone;
+            filterDDD.substr(1, 2);
+            this.contact.ddd = filterDDD.substr(1, 2);
+            console.log(this.contact.ddd);
           },
         },
       });
