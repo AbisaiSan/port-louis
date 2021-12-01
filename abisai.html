@@ -94,7 +94,7 @@
                       </div>
                       <div class="mt-4">
                         <!--Form-->
-                        <form @submit.prevent="createContact">
+                        <form @submit.prevent="validationContact">
                           <div class="mb-5">
                             <label
                               for="name"
@@ -159,7 +159,7 @@
                               >
                             </div>
                           </div>
-                          <template v-if="editing === false">
+                          <template>
                             <button
                               type="submit"
                               class="
@@ -176,23 +176,21 @@
                               Adicionar
                             </button>
                           </template>
-                          <template v-else>
-                            <button
-                              type="submit"
-                              class="
-                                block
-                                w-full
-                                p-3
-                                font-bold
-                                text-white
-                                bg-blue-500
-                                rounded-l
-                              "
-                              @click="edit(item)"
-                            >
-                              Atualizar
-                            </button>
-                          </template>
+                          <!-- <button
+                            type="submit"
+                            class="
+                              block
+                              w-full
+                              p-3
+                              font-bold
+                              text-white
+                              bg-blue-500
+                              rounded-l
+                            "
+                            @click="edit(item)"
+                          >
+                            Atualizar
+                          </button> -->
                         </form>
                       </div>
                     </div>
@@ -253,7 +251,9 @@
                           uppercase
                           font-normal
                         "
-                      ></th>
+                      >
+                        Ações
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -276,7 +276,7 @@
                           {{ item.telephone }}
                         </p>
                       </td>
-                      <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                      <td class="px-5 py-5 text-sm flex">
                         <button
                           v-on:click="toggleModal()"
                           @click="edit(item)"
@@ -293,7 +293,7 @@
                             />
                           </svg>
                         </button>
-                        <button @click="remove(item)">
+                        <button @click="remove(item)" class="btn btn-danger">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             class="h-5 w-5"
@@ -338,7 +338,7 @@
           list: [],
           showModal: false,
           submitted: false,
-          editing: false,
+          createContactModal: true,
           editContactModal: true,
         },
         validations: {
@@ -361,10 +361,14 @@
           toggleModal: function () {
             this.showModal = !this.showModal;
           },
-          createContact() {
-            //Validação dos dados dos inputs form
-            //Passando na validação é criado o contato
+          validationContact() {
             this.submitted = true;
+            this.$v.$touch();
+            if (this.$v.$invalid) {
+              return;
+            }
+          },
+          createContact() {
             this.$v.$touch();
             if (this.$v.$error) {
               return;
@@ -385,13 +389,12 @@
             };
           },
           remove(item) {
-            const contactValue = this.list.indexOf(item);
-            this.list.splice(contactValue, 1);
+            const idx = this.list.indexOf(item);
+            this.list.splice(idx, 1);
             localStorage.setItem("contacts", JSON.stringify(this.list));
           },
 
           edit(item) {
-            this.editing = true;
             this.index = this.list.indexOf(item);
             this.contact = Object.assign({}, item);
             localStorage.setItem("contacts", JSON.stringify(this.list));
@@ -401,6 +404,7 @@
             const filterDDD = this.contact.telephone;
             filterDDD.substr(1, 2);
             this.contact.ddd = filterDDD.substr(1, 2);
+            console.log(this.contact.ddd);
           },
         },
       });
