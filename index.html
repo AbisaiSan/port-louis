@@ -34,7 +34,7 @@
         <div class="container mx-auto px-4 sm:px-8 max-w-3xl">
           <div class="py-8">
             <div class="flex flex-row mb-1 sm:mb-0 justify-between w-full">
-              <h2 class="text-2xl leading-tight">{{message}}</h2>
+              <h2 class="text-2xl leading-tight">{{title}}</h2>
               <div class="text-end">
                 <button
                   class="
@@ -44,17 +44,14 @@
                     text-base
                     font-semibold
                     text-white
-                    bg-red-700
+                    bg-blue-700
                     rounded-lg
                     shadow-md
-                    hover:bg-red-600
+                    hover:bg-blue-600
                     focus:outline-none
-                    focus:ring-2
-                    focus:ring-purple-500
-                    focus:ring-offset-2
-                    focus:ring-offset-purple-200
+                   
                   "
-                  type="reset"
+                  type="button"
                   v-on:click="toggleModal()"
                 >
                   Adicionar
@@ -77,7 +74,7 @@
                     <div class="w-96 rounded border-2 shadow-md p-6 bg-white">
                       <div class="flex items-center justify-between">
                         <h3 class="text-2xl">Contato</h3>
-                        <button v-on:click="toggleModal()">
+                        <button @click="toggleModal()">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             class="h-6 w-6"
@@ -125,7 +122,9 @@
                                 class="text-red-700"
                                 v-if="!$v.contact.name.minLength"
                                 >Seu nome precisar ter mais de 6 letras.</span
+                                
                               >
+                             
                             </div>
                           </div>
                           <div class="mb-5">
@@ -146,10 +145,8 @@
                               "
                               v-mask="'(##) #####-####'"
                             />
-                            <div
-                              v-if="submitted && !$v.contact.telephone.required"
-                            >
-                              <span class="text-red-700"
+                            <div>
+                              <span   v-if="!$v.contact.telephone.required" class="text-red-700"
                                 >O preenchimento do número é obrigatorio
                               </span>
                               <span
@@ -168,15 +165,15 @@
                                 p-3
                                 font-bold
                                 text-white
-                                bg-blue-500
-                                rounded-l
+                                bg-blue-600
+                                rounded-md
                               "
                               @click="createContact"
                             >
                               Adicionar
                             </button>
                           </template>
-                          <template v-else>
+                          <template v-if="editing === true">
                             <button
                               type="submit"
                               class="
@@ -185,10 +182,9 @@
                                 p-3
                                 font-bold
                                 text-white
-                                bg-blue-500
-                                rounded-l
+                                bg-green-500
+                                rounded-md
                               "
-                              @click="edit(item)"
                             >
                               Atualizar
                             </button>
@@ -260,9 +256,8 @@
                     <tr
                       v-for="item in list"
                       :key="item.id"
-                      :class="{ 'bg-blue-200': item.ddd=='11' }"
                     >
-                      <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                      <td class="px-5 py-5 border-b border-gray-200 text-sm w-44">
                         <div class="flex items-center">
                           <div class="ml-3">
                             <p class="text-gray-900 whitespace-no-wrap">
@@ -271,12 +266,12 @@
                           </div>
                         </div>
                       </td>
-                      <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap">
+                      <td class="px-5 py-5 border-b border-gray-200 text-sm w-44">
+                        <p  :class="{ 'border-b-2 w-28 border-blue-600 ': item.ddd=='11' }" class=" text-left text-gray-900 whitespace-no-wrap">
                           {{ item.telephone }}
                         </p>
                       </td>
-                      <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                      <td class="px-5 py-5 border-b border-gray-200 text-sm w-40">
                         <button
                           v-on:click="toggleModal()"
                           @click="edit(item)"
@@ -284,7 +279,7 @@
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5"
+                            class="h-5 w-5 text-black-500 hover:text-green-600"
                             viewBox="0 0 20 20"
                             fill="currentColor"
                           >
@@ -293,10 +288,10 @@
                             />
                           </svg>
                         </button>
-                        <button @click="remove(item)">
+                        <button  @click="remove(item)">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5"
+                            class="h-5 w-5 text-black-500 hover:text-red-600"
                             viewBox="0 0 20 20"
                             fill="currentColor"
                           >
@@ -327,7 +322,7 @@
       new Vue({
         el: "#app",
         data: {
-          message: "Lista de Contatos",
+          title: "Lista de Contatos",
           contact: {
             id: 0,
             name: "",
@@ -339,13 +334,14 @@
           showModal: false,
           submitted: false,
           editing: false,
-          editContactModal: true,
         },
-        validations: {
+        //paramentos de validação 
+        //Name precisa ter no minimo 6 caracteres 
+         validations: {
           contact: {
             name: {
               required,
-              minLength: minLength(6),
+              minLength: minLength(6)
             },
             telephone: {
               required,
@@ -358,6 +354,7 @@
           this.list = contacts ? contacts : [];
         },
         methods: {
+          //Func do modal apenas alterando o estado
           toggleModal: function () {
             this.showModal = !this.showModal;
           },
@@ -369,14 +366,16 @@
             if (this.$v.$error) {
               return;
             }
+             this.editing = false;
             if (this.contact.id === 0) {
               this.contact.id = this.list.length + 1;
               this.contact.ddd = this.contact.telephone.substr(1, 2);
               this.list.push(this.contact);
-            } else {
+              } else {
               this.list[this.index] = this.contact;
             }
             localStorage.setItem("contacts", JSON.stringify(this.list));
+            this.showModal = false
             this.contact = {
               id: 0,
               name: null,
@@ -385,6 +384,9 @@
             };
           },
           remove(item) {
+            //Faço uma busca no list sendo encontrado ele retorna
+            //altero o conteúdo que veio na lista, removendo ele.
+            //É salvo novamente em localStorage convertendo os valores para String JSON
             const contactValue = this.list.indexOf(item);
             this.list.splice(contactValue, 1);
             localStorage.setItem("contacts", JSON.stringify(this.list));
@@ -393,10 +395,15 @@
           edit(item) {
             this.editing = true;
             this.index = this.list.indexOf(item);
+            //copio os valores do item q veio na lista todas as propriedades próprias
+            //E retorno o objeto destino
             this.contact = Object.assign({}, item);
             localStorage.setItem("contacts", JSON.stringify(this.list));
           },
           blueDDD(item) {
+            //Pego os valores e com a func substr filtro apenas os dois primeiros numeros
+            //Faço a verificação se o DDD for == 11
+            //Atraves da diretiva :class é alterado bg para blue
             this.contact = Object.assign({}, item);
             const filterDDD = this.contact.telephone;
             filterDDD.substr(1, 2);
